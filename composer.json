@@ -1,7 +1,7 @@
 {
-	"name" : "rin-project/fast-crud",
+    "name" : "rin-project/fast-crud",
     "type" : "symfony-bundle",
-    "description" : "Dream studio fast crud bundle",
+    "description" : "Developing DONOT download",
     "keywords" : ["Symfony", "Fast CRUD"],
     "homepage" : "https://github.com/immane/fast-crud",
     "license" : "MIT",
