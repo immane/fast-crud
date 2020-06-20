@@ -1,6 +1,6 @@
 <?php
 
-namespace DreamStudio\FastCrudBundle;
+namespace RinProject\FastCrudBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
