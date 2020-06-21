@@ -74,27 +74,61 @@ Sample:
 Or generate manually
 --------------------
 
+If you have the same PRiMARY NAME of Entity, Controller and Service, like *User, UserController, UserService*.  
+  
 Create a Fast-CRUD service:
 
     namespace App\Service;
 
-    use App\Entity\User;
     use RinProject\FastCrudBundle\Service\CrudService;
 
-    final class UserService extends CrudService
-    {
-        function __construct(ContainerInterface $container)
-        {
-            parent::__construct($container, User::class);
-        }
-    }
+    final class UserService extends CrudService {}
 
 Create a controller inherit CrudController:
 
     namespace App\Api\Controller;
 
-    use App\Service\UserService;
+    use RinProject\FastCrudBundle\Controller\CrudController;
+    use RinProject\FastCrudBundle\View\ApiView;
+    use RinProject\FastCrudBundle\View\Mixin\SingleCreateAndUpdateApiViewMixin;
+    use RinProject\FastCrudBundle\View\Mixin\SingleRetrieveApiViewMixin;
+
+    /**
+     * @Route("/api/user", name="api-user-")
+     */
+    class UserController extends CrudController
+    {
+        use ApiView, SingleRetrieveApiViewMixin, SingleCreateAndUpdateApiViewMixin;
+
+        public function commonFilter()
+        {
+            return ['id' => $this->getUser()];
+        }
+    }
+
+Or you have the different PRIMARY NAME, like *Staff, UserController and PersonService*.  
+  
+Service:
+
+    namespace App\Service;
+
+    use App\Entity\Staff;
     use RinProject\FastCrudBundle\Service\CrudService;
+
+    final class PersonService extends CrudService
+    {
+        function __construct(ContainerInterface $container)
+        {
+            parent::__construct($container, Staff::class);
+        }
+    }
+
+Controller:
+
+    namespace App\Api\Controller;
+
+    use App\Service\PersonService;
+    use RinProject\FastCrudBundle\Controller\CrudController;
     use RinProject\FastCrudBundle\View\ApiView;
     use RinProject\FastCrudBundle\View\Mixin\SingleCreateAndUpdateApiViewMixin;
     use RinProject\FastCrudBundle\View\Mixin\SingleRetrieveApiViewMixin;
@@ -108,7 +142,7 @@ Create a controller inherit CrudController:
 
         public function __construct()
         {
-            $this->serviceClass = UserService::class;
+            $this->serviceClass = PersonService::class;
         }
 
         public function commonFilter()

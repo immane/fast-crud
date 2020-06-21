@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Symfony\Component\CssSelector\Exception\InternalErrorException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Exception\ValidatorException;
@@ -21,19 +22,41 @@ abstract class CrudService
     /** @var \Doctrine\Common\Persistence\ObjectRepository|\Doctrine\ORM\EntityRepository */
     protected $rep;
     /** @var string */
-    protected $data_class;
+    protected $dataClass;
 
     /**
      * CrudService constructor.
+     * 
      * @param ContainerInterface $container
-     * @param string $data_class
+     * @param string $dataClass
      */
-    function __construct(ContainerInterface $container, string $data_class)
+    function __construct(ContainerInterface $container, string $dataClass = null)
     {
+        // init
         $this->container = $container;
-        $this->data_class = $data_class;
         $this->em = $container->get('doctrine.orm.entity_manager');
-        $this->rep = $this->em->getRepository($data_class);
+
+        if(empty($dataClass)) {
+            // guess data class
+            $className = (new \ReflectionClass($this))->getShortName();
+            $classType = 'Service';
+            $primaryName = '';
+            $classPrefix = 'App/Entity/';
+            $classSuffix = '';
+
+            // end with 'Service'
+            if(0 === substr_compare($className, $classType, -strlen($classType))) {
+                $primaryName = str_replace($classType, '', $className);
+            }
+            else {
+                throw new InternalErrorException('Cannot extends non-service class.');
+            }
+
+            $dataClass = $classPrefix . $primaryName . $classSuffix;
+        }
+
+        $this->dataClass = $dataClass;
+        $this->rep = $this->em->getRepository($dataClass);
     }
 
     /**
@@ -64,7 +87,7 @@ abstract class CrudService
         try {
             // Document reader.
             $docReader = new AnnotationReader();
-            $reflect = new \ReflectionClass($this->data_class);
+            $reflect = new \ReflectionClass($this->dataClass);
 
             // Get class information with reflection
             foreach ($reflect->getProperties() as $val) {
@@ -234,7 +257,7 @@ abstract class CrudService
      */
     public function new()
     {
-        return new $this->data_class();
+        return new $this->dataClass();
     }
 
     /**
