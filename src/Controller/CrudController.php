@@ -1,18 +1,21 @@
 <?php
+declare(strict_types=1);
 
 namespace RinProject\FastCrudBundle\Controller;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Knp\Bundle\PaginatorBundle\KnpPaginatorBundle;
 use Knp\Component\Pager\Pagination\AbstractPagination;
-use Knp\Component\Pager\Paginator;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
-abstract class RestController extends AbstractController
+abstract class CrudController extends AbstractController
 {
-    // Defining a Service Subscriber
+    /**
+     * Defining a Service Subscriber
+     *
+     * @return void
+     */
     public static function getSubscribedServices()
     {
         return array_merge(parent::getSubscribedServices(),
@@ -22,7 +25,11 @@ abstract class RestController extends AbstractController
         );
     }
 
-    protected function Pagination($collection)
+    /**
+     * @param [type] $collection
+     * @return void
+     */
+    protected function pagination($collection)
     {
         // get current request
         $request_stack = $this->get('request_stack');
@@ -46,15 +53,26 @@ abstract class RestController extends AbstractController
         }
     }
 
+    /**
+     * Make translation for information messages
+     * 
+     * @param string $msg
+     * @return void
+     */
     private function trans(string $msg)
     {
         return $this->get('translator')->trans($msg);
     }
 
-    protected function Success($content = '', $addition_message = 'SUCCESS')
+    /**
+     * @param string $content
+     * @param string $addition_message
+     * @return void
+     */
+    protected function success($content = '', $addition_message = 'SUCCESS')
     {
         $serializer = $this->get("serializer");
-        $paginatedContent = $this->Pagination($content);
+        $paginatedContent = $this->pagination($content);
         $response = [
             'data' => $paginatedContent,
             'code' => 0,
@@ -66,7 +84,13 @@ abstract class RestController extends AbstractController
         return new Response($serializer->serialize($response, 'json'), 200, array());
     }
 
-    protected function Warning($error_msg = '', $error_code = -1, $raw_data = '')
+    /**
+     * @param string $error_msg
+     * @param integer $error_code
+     * @param string $raw_data
+     * @return void
+     */
+    protected function warning($error_msg = '', $error_code = -1, $raw_data = '')
     {
         $serializer = $this->get("serializer");
         $response = [
@@ -77,8 +101,12 @@ abstract class RestController extends AbstractController
         return new Response($serializer->serialize($response, 'json'), 200, array());
     }
 
-    protected function Error($error_msg = 'Service unavailable.', $error_status = 500)
+    /**
+     * @param Exception $exception
+     * @return void
+     */
+    protected function error(\Exception $exception)
     {
-        return new Response($this->trans($error_msg), $error_status, array());
+        throw $exception;
     }
 }

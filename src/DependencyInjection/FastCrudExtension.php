@@ -1,11 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace RinProject\FastCrudBundle\DependencyInjection;
 
-use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 class FastCrudExtension extends Extension
 {
@@ -15,6 +14,6 @@ class FastCrudExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         // set parameters
-        $container->setParameter( 'fast_crud.exception_interceptor', $config[ 'exception_interceptor' ] );
+        $container->setParameter('fast_crud.exception_interceptor', $config['exception_interceptor']);
     }
 }
