@@ -1,10 +1,7 @@
 <?php
+declare(strict_types=1);
 
-namespace CommonBundle\View;
-
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Component\HttpFoundation\Response;
+namespace RinProject\FastCrudBundle\View;
 
 trait ApiView
 {

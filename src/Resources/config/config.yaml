@@ -1,6 +1,7 @@
 imports:
     - { resource: serializer.yaml }
     - { resource: services.yaml }
+    - { resource: swagger.yaml }
 
 fast_crud:
     exception_interceptor:

@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
 
-namespace CommonBundle\View;
+namespace RinProject\FastCrudBundle\View\Mixin;
 
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Swagger\Annotations as SWG;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,19 +18,17 @@ trait ListApiViewMixin
 
     /**
      * @Route("", name="list", methods={"GET"})
-     * @ApiDoc(
-     *  resource=true,
-     *  description="Api list view",
-     *  headers={
-     *     {"name"="X-Auth-Token"}
-     *  },
-     *  parameters={
-     *     {"name"="page", "dataType"="string", "required"=false},
-     *     {"name"="limit", "dataType"="string", "required"=false},
-     *     {"name"="@order", "dataType"="string", "required"=false},
-     *     {"name"="@filter", "dataType"="string", "required"=false},
-     *  },
+     * @SWG\Response(
+     *     response=200,
+     *     description="Api list view",
      * )
+     * @SWG\Parameter(name="page", in="query", type="string", description="Current page")
+     * @SWG\Parameter(name="limit", in="query", type="string", description="Page limit")
+     * @SWG\Parameter(name="@order", in="query", type="string", description="Datasets ordering")
+     * @SWG\Parameter(name="@filter", in="query", type="string", description="Datasets filter")
+     * @SWG\Tag(name="list")
+     * @Security(name="Bearer")
+     * 
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function listAction(): Response

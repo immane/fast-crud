@@ -1,0 +1,27 @@
+nelmio_api_doc:
+    areas:
+        path_patterns: # an array of regexps
+            - ^/api(?!/doc$)
+        host_patterns:
+            - ^api\.
+
+    documentation:
+        servers:
+          - url: http://api.example.com/unsafe
+            description: API over HTTP
+          - url: https://api.example.com/secured
+            description: API over HTTPS
+        info:
+            title: Fast CRUD!
+            description: 
+              You can change this config in any .yaml file in folder <i>config/packages/</i><br/>
+              <strong>Document:</strong> https://symfony.com/doc/master/bundles/NelmioApiDocBundle/index.html#using-the-bundle
+            version: 0.1.0
+        components:
+            securitySchemes:
+                Bearer:
+                type: http
+                scheme: bearer
+                bearerFormat: JWT
+        security:
+            - Bearer: []

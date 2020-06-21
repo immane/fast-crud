@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
 
-namespace CommonBundle\View;
+namespace RinProject\FastCrudBundle\View\Mixin;
 
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Swagger\Annotations as SWG;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,13 +31,13 @@ trait UpdateApiViewMixin
 
     /**
      * @Route("/{id}", name="update", methods={"PUT"}, requirements={"id"="\d+"})
-     * @ApiDoc(
-     *  resource=true,
-     *  description="Api update view",
-     *  headers={
-     *     {"name"="X-Auth-Token"}
-     *  },
+     * @SWG\Response(
+     *     response=200,
+     *     description="Api update view",
      * )
+     * @SWG\Tag(name="update")
+     * @Security(name="Bearer")
+     *
      * @param Request $request
      * @param $id
      * @return Response

@@ -1,26 +1,28 @@
 <?php
+declare(strict_types=1);
 
-namespace CommonBundle\View;
+namespace RinProject\FastCrudBundle\View\Mixin;
 
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Swagger\Annotations as SWG;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Response;
 
-trait DetailApiViewMixin
+trait RetrieveApiViewMixin
 {
     /**
-     * @Route("/{id}", name="detail", methods={"GET"}, requirements={"id"="\d+"})
-     * @ApiDoc(
-     *  resource=true,
-     *  description="Api detail view",
-     *  headers={
-     *     {"name"="X-Auth-Token"}
-     *  },
+     * @Route("/{id}", name="retrieve", methods={"GET"}, requirements={"id"="\d+"})
+     * @SWG\Response(
+     *     response=200,
+     *     description="Api retrieve view",
      * )
+     * @SWG\Tag(name="retrieve")
+     * @Security(name="Bearer")
+     * 
      * @param $id
      * @return Response
      */
-    public function detailAction($id): Response
+    public function retrieveAction($id): Response
     {
         $service = $this->get($this->serviceClass);
         $filter = $id ? ['id' => $id]: [];

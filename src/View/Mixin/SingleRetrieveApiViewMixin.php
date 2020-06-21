@@ -8,29 +8,26 @@ use Nelmio\ApiDocBundle\Annotation\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Response;
 
-trait DeleteApiViewMixin
+trait SingleRetrieveApiViewMixin
 {
     /**
-     * @Route("/{id}", name="delete", methods={"DELETE"}, requirements={"id"="\d+"})
+     * @Route("", name="retrieve", methods={"GET"})
      * @SWG\Response(
      *     response=200,
-     *     description="Api delete view",
+     *     description="Api retrieve view",
      * )
-     * @SWG\Tag(name="delete")
+     * @SWG\Tag(name="retrieve")
      * @Security(name="Bearer")
      * 
-     * @param $id
      * @return Response
      */
-    public function deleteAction($id): Response
+    public function retrieveAction(): Response
     {
         $service = $this->get($this->serviceClass);
         $filter = $this->commonFilter();
-        $filter['id'] = $id;
 
         $entity = $service->get($filter);
 
-        return $service->remove($entity) ?
-            $this->success() : $this->warning();
+        return $this->success($entity);
     }
 }

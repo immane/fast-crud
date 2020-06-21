@@ -1,7 +1,7 @@
 {
     "name" : "rin-project/fast-crud",
     "type" : "symfony-bundle",
-    "description" : "Developing DONOT download",
+    "description" : "Fast CRUD! (NOT FINISHED, DO NOT DOWNLOAD!)",
     "keywords" : ["Symfony", "Fast CRUD"],
     "homepage" : "https://github.com/immane/fast-crud",
     "license" : "MIT",
@@ -23,6 +23,7 @@
         "symfony/framework-bundle": "5.1.*",
         "sensio/framework-extra-bundle": "^5.5",
         "symfony/yaml": "5.1.*",
+        "nelmio/api-doc-bundle": "^3.6",
         "knplabs/knp-paginator-bundle": "^5.2"
     },
     "require-dev": {
