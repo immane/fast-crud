@@ -1,7 +1,7 @@
 {
     "name" : "rin-project/fast-crud",
     "type" : "symfony-bundle",
-    "description" : "Fast CRUD! (NOT FINISHED, DO NOT DOWNLOAD!)",
+    "description" : "Make CRUD Very Simple! (NOT FINISHED, COMING SOON!)",
     "keywords" : ["Symfony", "Fast CRUD"],
     "homepage" : "https://github.com/immane/fast-crud",
     "license" : "MIT",

@@ -1,5 +1,6 @@
 FastCurdBundle
 ==============
+Lets Make CRUD Very Simple! If you have any funny ideas, write issues.
 
 
 Prerequisites
@@ -54,6 +55,24 @@ If you want to catch all exceptions automatics, enable exception interceptor in 
 
 Usage
 -----
+
+Generate by command
+-------------------
+
+    C: create
+    R: retrieve
+    U: update
+    D: delete
+    L: list
+
+Sample:
+
+    $ php bin/console make:fast-crud RUDL App:Content
+    $ php bin/console make:fast-crud RL App:Region
+
+
+Or generate manually
+--------------------
 
 Create a Fast-CRUD service:
 
