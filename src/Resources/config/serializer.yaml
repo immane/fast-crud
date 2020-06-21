@@ -1,0 +1,7 @@
+framework:
+    serializer:
+        enabled: true
+        enable_annotations: true
+
+        circular_reference_handler: 'app.serializer.circular_reference_handler'
+        max_depth_handler: ~

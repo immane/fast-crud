@@ -1,0 +1,8 @@
+imports:
+    - { resource: serializer.yaml }
+    - { resource: services.yaml }
+
+fast_crud:
+    exception_interceptor:
+        enabled: true
+        effective_pattern: /^\/(api|manage)\/.*$/

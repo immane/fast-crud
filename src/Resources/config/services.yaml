@@ -1,0 +1,27 @@
+services:
+    # datetime normalizer
+    app.serializer.datetime_normalizer:
+        class: Symfony\Component\Serializer\Normalizer\DateTimeNormalizer
+        tags:
+            - { name: serializer.normalizer }
+
+    # object normalizer
+    app.serializer.method_normalizer:
+        class: RinProject\FastCrudBundle\Serializer\Normalizer\FlatNormalizer
+        autowire: false
+        arguments:
+            - '@serializer.mapping.class_metadata_factory'
+            - '@serializer.name_converter.camel_case_to_snake_case'
+        tags:
+            - { name: serializer.normalizer }
+
+    app.serializer.circular_reference_handler:
+        class: RinProject\FastCrudBundle\Serializer\Normalizer\CircularReferenceHandler
+
+    app.event_listener.exception_interceptor:
+        class: RinProject\FastCrudBundle\EventListener\ExceptionInterceptor
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
+        arguments:
+            - '@service_container'
+            - '@logger'
