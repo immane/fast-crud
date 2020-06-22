@@ -10,6 +10,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Symfony\Component\CssSelector\Exception\InternalErrorException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Exception\ValidatorException;
 
@@ -80,139 +81,18 @@ abstract class CrudService
      */
     public function list($object = null, $order = null): array
     {
-        // Entity field parse.
-        // Non-exist field in entities will be ignored.
-        $entityFields = [];
-
-        try {
-            // Document reader.
-            $docReader = new AnnotationReader();
-            $reflect = new \ReflectionClass($this->dataClass);
-
-            // Get class information with reflection
-            foreach ($reflect->getProperties() as $val) {
-                $annotations = $docReader->getPropertyAnnotations($reflect->getProperty($val->name));
-                foreach ($annotations as $annotation) {
-                    // Normal type
-                    // Note: type must be defined in Entity fields
-                    if(property_exists($annotation, 'type')) {
-                        $entityFields[$val->name] = [
-                            'type' => $annotation->type,
-                        ];
-
-                        if(property_exists($annotation, 'options') &&
-                            array_key_exists('comment', $annotation->options)) {
-                            $entities[$val->name]['label'] = $annotation->options['comment'];
-                        }
-                    }
-
-                    // Accept ManyToOne type
-                    elseif($annotation instanceof ManyToOne) {
-                        $entityFields[$val->name] = [
-                            'type' => 'ManyToOne',
-                        ];
-                    }
-                }
-            }
-        } catch (\Exception $e) {}
-
-
-        // Define getter closure
-        $g = function($object, $key) {
-            $getter = 'get'.ucfirst($key);
-            $object = $object->$getter();
-
-            // when object is a entity relations
-            if(method_exists($object, 'getId')) {
-                return $object->getId();
-            }
-
-            // default
-            return $object;
-        };
-
-        // Translate data to target
-        $t = function($object, $k) {
-            // Income object is DateTime format.
-            if($object instanceof \DateTime) {
-                return new \DateTime($k);
-            }
-
-            // default
-            return $k;
-        };
-
-        /* Condition function configuration
-           $o : Object
-           $k : Key
-           $d : Data
-           $g : Object Getter
-           $t : Data Translator
-        */
-        $conditionFunctions = [
-            '<='   => function($o, $k, $d) use ($g, $t) { return $g($o, $k) <= $t($g($o, $k), $d); },   // less or equal
-            '<'    => function($o, $k, $d) use ($g, $t) { return $g($o, $k) <  $t($g($o, $k), $d); },   // less
-            '>='   => function($o, $k, $d) use ($g, $t) { return $g($o, $k) >= $t($g($o, $k), $d); },   // grater or equal
-            '>'    => function($o, $k, $d) use ($g, $t) { return $g($o, $k) >  $t($g($o, $k), $d); },   // grater
-            '='    => function($o, $k, $d) use ($g, $t) { return $g($o, $k) == $t($g($o, $k), $d); },   // equal
-            '=='   => function($o, $k, $d) use ($g, $t) { return $g($o, $k) == $t($g($o, $k), $d); },   // equal
-            '!='   => function($o, $k, $d) use ($g, $t) { return $g($o, $k) != $t($g($o, $k), $d); },   // not equal
-            '~'    => function($o, $k, $d) use ($g, $t) { return strpos($g($o, $k) ?: '', $d) !== false; },   // like
-        ];
-
-        // Setup filter, Match regex
-
+        /** Filters and orders */
         /*
-        // Filter structure
-        $filters = [
-            'entityName' => [
-                'data' => $data,
-                'function' => $function,
-            ]
-        ];
-
-        // GET data sample
+        // GOT data sample
         $query = [
-            'id' => 1,              // Integer
-            'name' => '~ Rin'       // String, fuzzy matching
-            'type' => 1,            // Entity, Many-to-one
-            'createTime' => '> yesterday midnight', // DateTime,
-            'modifiedTime' => '<= 2020-01-01'       // DateTime,
             '@order' => 'name|ASC, id|DESC'  // order by
             '@filter' => 'entity.id = 1 || entity.user = 10' // filter, attempt to add
         ];
         */
-        $filters = [];
-        $conditionPattern = "/^\s*(\>\=|\<\=|\>|\=|\<|\~)\s*(.+)$/";
 
-        // get and parse request
+        // Get and parse request
         $request_stack = $this->container->get('request_stack');
         $request = $request_stack->getCurrentRequest();
-        foreach ($request->query as $key => $value) {
-
-            if(array_key_exists($key, $entityFields)) {
-                $matches = [];
-                $result = preg_match_all($conditionPattern, $value, $matches);
-
-                if($result == 0 /* equal */) {
-                    $conditionSign = '=';
-                    $conditionData = $value;
-                }
-                elseif($result == 1 /* matches */) {
-                    $conditionSign = $matches[1][0]; // match first bracket
-                    $conditionData = $matches[2][0]; // match second bracket
-                }
-                else continue;
-
-                // translate input filter data to a filter array.
-                if(array_key_exists($conditionSign, $conditionFunctions)) {
-                    $filters[$key] = [
-                        'data' => $conditionData,
-                        'function' => $conditionFunctions[$conditionSign],
-                    ];
-                }
-            }
-        }
 
         // Replace order
         if($preOrders = $request->query->get('@order')) {
@@ -227,8 +107,6 @@ abstract class CrudService
             }
         }
 
-        // Get entities
-
         // Normal list
         if(is_array($object)) {
             $entities = $this->rep->findBy($object, $order);
@@ -238,15 +116,15 @@ abstract class CrudService
             $entities = $this->rep->findBy([], $order);
         }
 
-        $entities = array_filter($entities,
-            function($entity) use ($filters) {
-                foreach ($filters as $key => $filter) {
-                    // Load filter data and apply filter function
-                    if(!$filter['function']($entity, $key, $filter['data']) ) return false;
+        // General filter
+        if($filter = $request->query->get('@filter')) {
+            $entities = array_filter($entities,
+                function($entity) use ($filter) {
+                    $expressionLanguage = new ExpressionLanguage();
+                    return $expressionLanguage->evaluate($filter, ['entity' => $entity]); 
                 }
-                return true;
-            }
-        );
+            );
+        }
 
         return $entities;
     }
