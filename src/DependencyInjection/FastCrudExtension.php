@@ -14,6 +14,8 @@ class FastCrudExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         // set parameters
-        $container->setParameter('fast_crud.exception_interceptor', $config['exception_interceptor']);
+        if(array_key_exists('exception_interceptor', $config)) {
+            $container->setParameter('fast_crud.exception_interceptor', $config['exception_interceptor']);
+        }
     }
 }
