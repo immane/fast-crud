@@ -46,6 +46,12 @@ class FlatNormalizer extends GetSetMethodNormalizer
                 return $tmp_object;
             }
 
+            // string, including json object
+            elseif (is_string($object)) {
+                $json = json_decode($object, true);
+                return json_last_error() === JSON_ERROR_NONE ? $json: $object; 
+            }
+                        
             // normal objects
             else {
                 return $object;

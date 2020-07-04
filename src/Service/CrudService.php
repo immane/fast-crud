@@ -120,8 +120,13 @@ abstract class CrudService
         if($filter = $request->query->get('@filter')) {
             $entities = array_filter($entities,
                 function($entity) use ($filter) {
-                    $expressionLanguage = new ExpressionLanguage();
-                    return $expressionLanguage->evaluate($filter, ['entity' => $entity]); 
+                    try {
+                        $expressionLanguage = new ExpressionLanguage();
+                        return $expressionLanguage->evaluate($filter, ['entity' => $entity]); 
+                    }
+                    catch(\Exception $e) {
+                        return false;
+                    }
                 }
             );
         }
