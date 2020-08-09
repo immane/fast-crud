@@ -8,6 +8,8 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use RinProject\FastCrudBundle\Utils\DateTime;
+use RinProject\FastCrudBundle\Utils\Math;
 use Symfony\Component\CssSelector\Exception\InternalErrorException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -85,8 +87,9 @@ abstract class CrudService
         /*
         // GOT data sample
         $query = [
-            '@order' => 'name|ASC, id|DESC'  // order by
-            '@filter' => 'entity.id = 1 || entity.user = 10' // filter, attempt to add
+            '@order' => 'name|ASC, id|DESC',  // order by
+            '@sort': 'x.getId() > y.getId()', // sort collection
+            '@filter' => 'entity.getUser().getProfile().getCreatedTime() > datetime.get("now") && entity.getCategory().getId() == 5' // filter, attempt to add
         ];
         */
 
@@ -122,9 +125,39 @@ abstract class CrudService
                 function($entity) use ($filter) {
                     try {
                         $expressionLanguage = new ExpressionLanguage();
-                        return $expressionLanguage->evaluate($filter, ['entity' => $entity]); 
+                        return $expressionLanguage->evaluate(
+                            $filter, 
+                            [
+                                'entity' => $entity,
+                                'Math' => new Math(),
+                                'Datetime' => new DateTime(),
+                            ]
+                        ); 
                     }
                     catch(\Exception $e) {
+                        return false;
+                    }
+                }
+            );
+        }
+
+        // General sorter
+        if ($sorter = $request->query->get('@sort')) {
+            usort(
+                $entities,
+                function ($x, $y) use ($sorter) {
+                    try {
+                        $expressionLanguage = new ExpressionLanguage();
+                        return $expressionLanguage->evaluate(
+                            $sorter,
+                            [
+                                'x' => $x,
+                                'y' => $y,
+                                'Math' => new Math(),
+                                'Datetime' => new DateTime(),
+                            ]
+                        );
+                    } catch (\Exception $e) {
                         return false;
                     }
                 }

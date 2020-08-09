@@ -8,9 +8,15 @@ use Nelmio\ApiDocBundle\Annotation\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Exception\ValidatorException;
 
 trait UpdateApiViewMixin
 {
+    /* 
+    protected $requiredUpdateProperties = [];
+    protected $acceptedUpdateProperties = [];
+    */
+
     protected function defaultUpdateValues(): array
     {
         /** Default values */
@@ -49,15 +55,46 @@ trait UpdateApiViewMixin
         $filter['id'] = $id;
         $entity = $service->get($filter);
 
+        // external content
         $content = json_decode($request->getContent(), true) ? : [];
+
+        // properties process.
+        if(
+            property_exists($this, 'requiredUpdateProperties') ||
+            property_exists($this, 'acceptedUpdateProperties')
+        ) {
+            $data = [];
+
+            if (property_exists($this, 'requiredUpdateProperties')) {
+                foreach ($this->requiredUpdateProperties as $property) {
+                    if (!array_key_exists($property, $content)) {
+                        throw new ValidatorException(ucfirst($property) . " cannot be empty.");
+                    }
+                    $data[$property] = $content[$property];
+                }
+            }
+
+            if (property_exists($this, 'acceptedUpdateProperties')) {
+                foreach ($this->acceptedUpdateProperties as $property) {
+                    if (array_key_exists($property, $content)) {
+                        $data[$property] = $content[$property];
+                    }
+                }
+            }
+
+            $content = $data;
+        }
+
+        // process content
         $content = $this->processUpdateContent(
             array_merge($content, $this->defaultUpdateValues())
         );
 
+        // save
         if ($entity = $service->update($entity, $content)) {
-            return $this->success($this->afterUpdated($entity));
+            return $this->Success($this->afterUpdated($entity));
         } else {
-            return $this->warning();
+            return $this->Warning();
         }
     }
 }
